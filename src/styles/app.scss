@@ -1,4 +1,17 @@
 @use './globals.scss';
+@use './mixins';
+@use './reset';
 
 //home
 @use './home/header';
+@use './home/logo';
+@use './home/index';
+@use './home/gameCardHome.scss';
+
+@font-face {
+    font-family: 'thunder';
+    src:
+        url('../../public/assets/fonts/Thunder-VF.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+}

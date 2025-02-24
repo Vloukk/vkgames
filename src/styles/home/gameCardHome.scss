@@ -1,0 +1,65 @@
+.GameCardHome {
+    position: relative;
+    padding: 50px;
+    width: 100%;
+    cursor: pointer;
+    background: var(--background);
+    border: 1px solid var(--background--2);
+    box-shadow: 2px 2px 0px 2px var(--background--2);
+    border-radius: 5px !important;
+    box-sizing: border-box;
+    height: 35vh;
+    &__info {
+        .info {
+            &__title {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                .title {
+                    font-size: 6em;
+                    font-family: 'thunder hc';
+                    font-weight: 600;
+                }
+                .img {
+                    width: 100px;
+                    img {
+                        width: 100%;
+                    }
+                }
+            }
+            &__rules  {
+                margin-top: 40px;
+                color: var(--foreground--2);
+                width: 70%;
+                line-height: 1.4;
+
+            }
+        }
+    }
+    &__create {
+        position: relative;
+        margin-top: 75px;
+        padding: 0 50px;
+        .create {
+            &__form {
+                color: var(--foreground--2);
+                width: fit-content;
+                .form {
+                    &__info {
+                        margin-top: 10px;
+                        display: flex;
+                        gap: 10px;
+                        input {
+                            padding: 5px 10px;
+                        }
+                        button {
+                            border: none;
+                            padding: 0 10px;
+                            color: var(--foreground);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

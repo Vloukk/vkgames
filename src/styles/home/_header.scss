@@ -1,5 +1,57 @@
+
 .header {
+    position: relative;
     width: 100%;
-    padding: 20px;
-    border: 1px solid red;
+    padding: 40px 30px;
+    display: flex;
+    box-sizing: border-box;
+    max-height: 100px;
+    background-color: var(--background);
+    &__logo {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    &__info {
+        display: flex;
+        flex: 1;
+        justify-content: end;
+        .info {
+            &__links {
+                font-size: 1em;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                a {
+                    font-weight: medium;
+                    font-family: 'thunder lc';
+                    transition: all .3s ease-in-out;
+                    &:hover {
+                        color: var(--foreground--2);
+                    }
+                }
+                .connexion, .traduction {
+                    box-sizing: border-box;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 40px;
+                    height: 40px;
+                    svg {
+                        path {
+                            transition: all .3s ease-in-out;
+                        }
+                    }
+                    &:hover {
+                        svg {
+                            path {
+                                fill: var(--foreground--2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

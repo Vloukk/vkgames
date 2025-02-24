@@ -1,0 +1,13 @@
+{
+    "games" : [
+        {
+            "id" : "quizz",
+            "title" : "Flip'n'Answer",
+            "color" : "#FF6C3C",
+            "animation" : "flip",
+            "text" : "Créer un jeu en ligne interactif avec des thèmes divers, une gestion en temps réel des parties et une expérience utilisateur fluide. Le jeu sera basé sur Firebase pour la gestion des utilisateurs, des données et des parties en temps réel. L'authentification se fera via NextAuth, et des solutions légères comme Zustand et Recoil seront utilisées pour la gestion de l'état.",
+            "icon" : "/assets/games/flipnanswer/icons/brain.png",
+            "link" : ""
+        }
+    ]
+}
