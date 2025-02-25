@@ -3,28 +3,24 @@
 :root {
   font-family: 'thunder';
 
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #080808;
+  --background--2: #000000;
+  --background--3: #121212;
+
+  --foreground: #FFFCE1;
+  --foreground--2: #817F74;
+  --foreground--3: "#2e2e2e"
 
   --flipnanswer : "#FF6C3C";
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #080808;
-    --background--2: #000000;
-    --background--3: #121212;
-
-    --foreground: #FFFCE1;
-    --foreground--2: #817F74;
-    --foreground--3: "#2e2e2e"
-  }
-}
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  color: var(--foreground) !important;
+  background: var(--background) !important;
 }
 
 body {
@@ -62,11 +58,5 @@ input {
     outline: none; /* Retirer le contour par défaut */
     color: var(--foreground) !important;
     border: 1px solid var(--foreground--2) !important;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
   }
 }

@@ -1,5 +1,5 @@
 // Dans ton composant ou ta page, par exemple /pages/index.js
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../src/utils/supabaseClient';
 
 const HomePage = () => {
   // Exemple d'utilisation de supabase

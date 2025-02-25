@@ -8,6 +8,10 @@
 @use './home/index';
 @use './home/gameCardHome.scss';
 
+//games/quizz
+@use './games/quizz/quizzPage';
+@use './games/quizz/components/rulesModal';
+
 @font-face {
     font-family: 'thunder';
     src:

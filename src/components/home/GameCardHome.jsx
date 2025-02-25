@@ -1,11 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation"; // Next.js 15 utilise "next/navigation"
+import useGameStore from "../../store/quizz/gameStore";
+import { createGame } from "../../services/gameService";
+import { createQuizzGame } from "../../services/games/quizzService";
 import gsap from "gsap";
 
 export default function GameCardHome({ title, text, icon, link, color, animation }) {
+  const [pseudoInput, setPseudoInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(false); // État pour savoir si la carte est agrandie
   const cardRef = useRef(null); // Référence pour la carte entière
   const titleRef = useRef([]); // Référence pour les lettres du titre
   const createRef = useRef(null); // Référence pour la section GameCardHome__create
+  const setGame = useGameStore((state) => state.setGame);
+  const setPseudo = useGameStore((state) => state.setPseudo);
+  const router = useRouter();
+
+  console.log("✅ Pseudo enregistré dans Zustand :", pseudoInput);
+
 
   useEffect(() => {
     const animateLetters = (reverse = false) => {
@@ -94,6 +105,33 @@ export default function GameCardHome({ title, text, icon, link, color, animation
     e.stopPropagation(); // Empêche le clic d'affecter l'élément parent (la carte)
   };
 
+  /// creation de la partie
+
+  const handleCreateGame = async (e) => {
+    e.preventDefault();
+  
+    if (!pseudoInput.trim()) {
+      alert("Veuillez entrer un pseudo !");
+      return;
+    }
+  
+    try {
+      console.log("🚀 handleCreateGame() appelé avec pseudo :", pseudoInput);
+      const gameId = await createQuizzGame(pseudoInput);
+      
+      setGame({ id: gameId, host: pseudoInput });
+      setPseudo(pseudoInput);
+      localStorage.setItem("pseudo", pseudoInput); // ✅ Sauvegarde dans localStorage
+  
+      console.log("✅ Pseudo enregistré avant redirection :", pseudoInput);
+  
+      router.push(`/game/${gameId}`);
+    } catch (error) {
+      console.error("❌ Erreur lors de la création de la partie :", error);
+      alert(`Erreur lors de la création de la partie : ${error.message}`);
+    }
+  };  
+
   return (
     <div className="GameCardHome" ref={cardRef} onClick={handleCardClick}> {/* Ajout du click handler */}
       <div className="GameCardHome__info">
@@ -122,14 +160,20 @@ export default function GameCardHome({ title, text, icon, link, color, animation
           <form className="create__form" onClick={handleFormClick}>
             <p>Choisissez votre pseudo</p>
             <div className="form__info">
-              <input type="text" placeholder="Votre pseudo..." />
-              <button
-                type="submit"
-                className="button"
-                style={{ backgroundColor: color }} // Ici, la couleur récupérée du JSON pour le background
-              >
-                Let's goooo
-              </button>
+            <input
+              type="text"
+              placeholder="Votre pseudo..."
+              value={pseudoInput}  // ✅ Utilisation de pseudoInput
+              onChange={(e) => setPseudoInput(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="button"
+              style={{ backgroundColor: color }}
+              onClick={handleCreateGame}
+            >
+              Let's goooo
+            </button>
             </div>
           </form>
         )}
