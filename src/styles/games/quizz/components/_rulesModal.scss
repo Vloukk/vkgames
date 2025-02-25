@@ -1,30 +1,140 @@
-.modal {
+@use '../../../mixins' as *;
+
+.rulesModal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--background);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-  }
-  
-  .modal-content {
-    background: #222;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    color: white;
-    width: 50%;
-  }
-  
-  button {
-    margin: 10px;
-    padding: 10px 15px;
-    background: orange;
-    border: none;
-    cursor: pointer;
-  }
-  
+    border: 1px solid red;
+
+    &__content {
+        background: var(--background);
+        border: 1px solid var(--background--2);
+        box-shadow: 2px 2px 0px 2px var(--background--2);
+        border-radius: 5px;
+        padding: 50px;
+        border-radius: 5px;
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+        h2 {
+            font-size: 3em;
+            font-family: 'thunder lc';
+            font-style: italic;
+            color: var(--foreground);
+            font-weight: 500;
+            display: flex;
+            flex: 1;
+        }
+        .content {
+            &__rules {
+                width: 100%;
+                display: flex;
+                gap: 50px;
+                justify-content: space-between;
+                button {
+                    font-size: .6em;
+                    padding: 5px 10px;
+                    min-width: 15px;
+                    min-height: 15px;
+                    @include button(var(--color--quizz), var(--color--quizz--2), var(--color--quizz--2));
+                    color: var(--foreground);
+                }
+                .rules {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 10px;
+                    p {
+                        flex: 1;
+                    }
+                    .time, .url, .themes {
+                        display: flex;
+                        align-items: center;
+                        gap: 20px;
+                        justify-content: start;
+                        flex: 1;
+                    }
+                    &__left {
+                        width: 50%;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 30px;
+                        .left {
+                            &__time {
+                                display: flex;
+                            }
+                            &__url {
+                                display: flex;
+                            }
+                        }
+                    }
+                    &__right {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 30px;
+                        width: 50%;
+                        border: 1px solid var(--color--quizz);
+                        border-radius: 5px;
+                        height: fit-content;
+                        padding: 10px 20px;
+                        .right {
+                            &__btn-themes {
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                width: 100%;
+                                .btn-themes {
+                                    display: flex;
+                                    gap: 20px;
+                                }
+                            }
+                            &__tb-themes {
+                                padding: 10px;
+                                .themes-grid {
+                                    display: grid;
+                                    grid-template-columns: repeat(5, auto);
+                                    gap: 15px;
+                                    margin-top: 20px;
+                                    button {
+                                        margin: 0 !important;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            &__info {
+                width: calc(50% - 25px);
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                .info {
+                    &__rules {
+                        line-height: 1.2;
+                        color: var(--foreground--2);
+                        font-weight: 300;
+                        font-family: 'thunder';
+                    }
+                }
+                .save-button {
+                    background: var(--color--quizz);
+                    border: 1px solid var(--color--quizz--2);
+                    box-shadow: 2px 2px 0px 2px var(--color--quizz--2) !important;
+                    color: var(--foreground);
+                    margin-top: 10px;
+                    padding: 10px 15px;
+                    width: fit-content;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,24 @@
+.playerInfos {
+    padding: 30px;
+    box-sizing: border-box;
+    background-color: var(--background--2);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--font--color--quizz);
+    grid-area: 2 / 1 / 3 / 2;
+    h2 {
+        font-weight: bold;
+        font-size: 1.4em;
+        font-family: 'thunder lc';
+    }
+    p {
+        display: flex;
+        justify-content: space-between;
+    }
+    button {
+        padding: 10px 15px;
+        color: var(--font--color--quizz);
+    }
+}

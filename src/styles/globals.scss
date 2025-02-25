@@ -6,12 +6,18 @@
   --background: #080808;
   --background--2: #000000;
   --background--3: #121212;
+  --background--4: #030303;
 
   --foreground: #FFFCE1;
   --foreground--2: #817F74;
   --foreground--3: "#2e2e2e"
 
   --flipnanswer : "#FF6C3C";
+
+  //games quizz
+  --color--quizz : #FF6C3C;
+  --color--quizz--2 : #6D2700;
+  --font--color--quizz : #D3D3D3;
 }
 
 
@@ -41,12 +47,9 @@ a {
   text-decoration: none;
 }
 
-.button {
-  @include button();
-}
-
 button {
   border-radius: 5px;
+  @include button();
 }
 
 input {

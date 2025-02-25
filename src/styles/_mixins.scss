@@ -1,17 +1,24 @@
 // src/styles/mixins.scss
-@mixin button() {
+@mixin button($bg-color: var(--background), $border-color: var(--background--2), $shadow-color: var(--background--2)) {
     cursor: pointer;
-    background: var(--background);
-    border: 1px solid var(--background--2);
-    box-shadow: 2px 2px 0px 2px var(--background--2);
+    background: $bg-color;
+    border: 1px solid $border-color;
+    box-shadow: 2px 2px 0px 2px $shadow-color;
     border-radius: 5px;
   
     &:hover {
         color: var(--forground--2);
     }
 
-    &:active {
+    // Garde l'effet d'enfoncement aussi quand le bouton est en focus ou activé
+    &:active, &:focus {
+        transform: translateY(4px);  // Décale le bouton de 4px vers le bas pour simuler l'écrasement
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);  // Ombre plus douce pour simuler l'enfoncement
+    }
+
+    &.selected {
         transform: translateY(4px);  // Décale le bouton de 4px vers le bas pour simuler l'écrasement
         box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);  // Ombre plus douce pour simuler l'enfoncement
     }
 }
+

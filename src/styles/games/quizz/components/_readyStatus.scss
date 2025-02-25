@@ -1,0 +1,9 @@
+.readyStatus {
+    grid-area: 9 / 1 / 13 / 2;
+    button {
+        width: 100%;
+        height: 100%;
+        font-size: 3em;
+        color: var(--font--color--quizz);
+    }
+}
