@@ -14,6 +14,8 @@
 @use './games/quizz/components/playerList';
 @use './games/quizz/components/playerInfos';
 @use './games/quizz/components/readyStatus';
+@use './games/quizz/components/gameActions';
+@use './games/quizz/components/pseudoModal';
 
 @font-face {
     font-family: 'thunder';

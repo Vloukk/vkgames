@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../utils/supabaseClient";
 
-export default function ReadyStatus({ gameId, userId, isGameStarted }) {
+export default function ReadyStatus({ gameId, pseudo, isGameStarted }) {
   const [isReady, setIsReady] = useState(false);
   const [timer, setTimer] = useState(null);
 
   // ✅ Récupérer l'état "prêt" au chargement
   useEffect(() => {
-    if (!gameId || !userId) return;
+    if (!gameId || !pseudo) return;
 
     const fetchReadyStatus = async () => {
       const { data, error } = await supabase
         .from("players")
         .select("is_ready")
         .eq("game_id", gameId)
-        .eq("user_id", userId)
+        .eq("pseudo", pseudo) // 🔥 Remplace user_id par pseudo
         .single();
 
       if (error) {
@@ -26,11 +26,11 @@ export default function ReadyStatus({ gameId, userId, isGameStarted }) {
     };
 
     fetchReadyStatus();
-  }, [gameId, userId]);
+  }, [gameId, pseudo]);
 
   // ✅ Mettre à jour le statut "prêt"
   const toggleReady = async () => {
-    if (!gameId || !userId) return;
+    if (!gameId || !pseudo) return;
 
     const newReadyState = !isReady;
     setIsReady(newReadyState);
@@ -38,7 +38,7 @@ export default function ReadyStatus({ gameId, userId, isGameStarted }) {
     const { error } = await supabase
       .from("players")
       .update({ is_ready: newReadyState })
-      .match({ game_id: gameId, user_id: userId });
+      .match({ game_id: gameId, pseudo: pseudo }); // 🔥 Mise à jour avec pseudo
 
     if (error) {
       console.error("❌ Erreur mise à jour du statut :", error);
@@ -48,12 +48,11 @@ export default function ReadyStatus({ gameId, userId, isGameStarted }) {
   // ✅ Lancer le timer quand la partie commence
   useEffect(() => {
     if (isGameStarted) {
-      let countdown = 10; // Temps avant début
+      let countdown = 10;
       setTimer(countdown);
 
       const interval = setInterval(() => {
-        countdown -= 1;
-        setTimer(countdown);
+        setTimer((prev) => (prev > 0 ? prev - 1 : 0));
         if (countdown <= 0) clearInterval(interval);
       }, 1000);
 

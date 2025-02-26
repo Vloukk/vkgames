@@ -1,0 +1,35 @@
+@use '../../../mixins' as *;
+
+.pseudoModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50vw;
+    border-radius: 5px;
+    &__content {
+        padding: 50px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        h2 {
+            font-size: 1.4em;
+            font-family: 'thunder lc';
+            font-style: italic;
+            color: var(--foreground);
+            font-weight: 500;
+        }
+        form {
+            display: flex;
+            gap: 20px;
+            input, button {
+                padding: 10px 15px;
+            }
+            button {
+                @include button(var(--color--quizz), var(--color--quizz--2), var(--color--quizz--2));
+                color: var(--foreground);
+            }
+        }
+    }
+}

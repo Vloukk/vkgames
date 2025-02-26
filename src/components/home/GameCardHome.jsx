@@ -65,13 +65,6 @@ export default function GameCardHome({ title, text, icon, link, color, animation
     const cardElement = cardRef.current;
     const createElement = createRef.current;
 
-    // Animation de la carte
-    gsap.to(cardElement, {
-      height: isExpanded ? "35vh" : "45vh",
-      duration: 0.5,
-      ease: "power2.out",
-    });
-
     // Animation de la section GameCardHome__create
     if (isExpanded) {
       // Si la carte se rétracte, réduire l'opacité et masquer le formulaire
@@ -133,7 +126,7 @@ export default function GameCardHome({ title, text, icon, link, color, animation
   };  
 
   return (
-    <div className="GameCardHome" ref={cardRef} onClick={handleCardClick}> {/* Ajout du click handler */}
+    <div className={`GameCardHome ${isExpanded ? "expanded" : ""}`} ref={cardRef} onClick={handleCardClick}>
       <div className="GameCardHome__info">
         <div className="info__title" style={{ color }}>
           <div className="title">
@@ -158,7 +151,7 @@ export default function GameCardHome({ title, text, icon, link, color, animation
       <div className="GameCardHome__create" ref={createRef}>
         {isExpanded && (
           <form className="create__form" onClick={handleFormClick}>
-            <p>Choisissez votre pseudo</p>
+            <p>Choisissez votre pseudo :</p>
             <div className="form__info">
             <input
               type="text"

@@ -5,10 +5,6 @@
     border: 1px solid $border-color;
     box-shadow: 2px 2px 0px 2px $shadow-color;
     border-radius: 5px;
-  
-    &:hover {
-        color: var(--forground--2);
-    }
 
     // Garde l'effet d'enfoncement aussi quand le bouton est en focus ou activé
     &:active, &:focus {
@@ -22,3 +18,23 @@
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+@mixin tablet {
+    @media only screen and (min-width: 768px) and (max-width: 991px) {
+      @content;
+    }
+  }
+  
+  // Mixin pour les appareils de bureau
+  @mixin desktop {
+    @media only screen and (min-width: 992px) {
+      @content;
+    }
+  }
+  
+  @mixin large {
+    @media only screen and (min-width: 1920px) {
+      @content;
+    }
+  }

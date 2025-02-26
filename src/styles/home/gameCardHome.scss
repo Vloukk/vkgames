@@ -1,3 +1,5 @@
+@use '../mixins' as *;
+
 .GameCardHome {
     position: relative;
     padding: 50px;
@@ -9,6 +11,13 @@
     border-radius: 5px !important;
     box-sizing: border-box;
     height: 35vh;
+    transition: height .3s ease-in-out;
+    @include desktop {
+        height: 45vh;
+    }
+    @include large {
+        height: 30vh;
+    }
     &__info {
         .info {
             &__title {
@@ -19,9 +28,15 @@
                     font-size: 6em;
                     font-family: 'thunder hc';
                     font-weight: 600;
+                    @include desktop {
+                        font-size: 4em;
+                    }
                 }
                 .img {
                     width: 100px;
+                    @include desktop {
+                        width: 75px;
+                    }
                     img {
                         width: 100%;
                     }
@@ -32,6 +47,9 @@
                 color: var(--foreground--2);
                 width: 70%;
                 line-height: 1.4;
+                @include desktop {
+                    font-size: .9em;
+                }
 
             }
         }
@@ -40,10 +58,16 @@
         position: relative;
         margin-top: 75px;
         padding: 0 50px;
+        @include desktop {
+            margin-top: 50px;
+        }
         .create {
             &__form {
                 color: var(--foreground--2);
                 width: fit-content;
+                @include desktop {
+                    font-size: .9em;
+                }
                 .form {
                     &__info {
                         margin-top: 10px;
@@ -51,15 +75,31 @@
                         gap: 10px;
                         input {
                             padding: 5px 10px;
+                            @include desktop {
+                                padding: 10px 15px;
+                            }
                         }
                         button {
                             border: none;
                             padding: 0 10px;
+                            @include button(var(--color--quizz), var(--color--quizz--2), var(--color--quizz--2));
                             color: var(--foreground);
+                            @include desktop {
+                                font-size: .9em;
+                            }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+.GameCardHome.expanded {
+    @include desktop {
+        height: 55vh;
+    }
+    @include large {
+        height: 40vh;
     }
 }

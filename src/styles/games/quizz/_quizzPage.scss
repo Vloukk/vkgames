@@ -1,3 +1,5 @@
+@use '../../mixins' as *;
+
 .gameQuizz {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -9,6 +11,7 @@
     height: 100vh;
 
     &__grid {
+        position: relative;
         grid-area: 1 / 1 / 13 / 11;
         border: 1px solid red !important;
     }
@@ -19,19 +22,8 @@
         gap: 15px;
         grid-template-columns: 1fr;
         grid-template-rows: repeat(12, 1fr);
-        .utils {
-            &__actions {
-                display: flex;
-                flex-direction: column;
-                gap: 15px;
-                grid-area: 1 / 1 / 2 / 2;
-                button {
-                    font-size: 1.2em;
-                    padding: 20px 30px;
-                    color: var(--font--color--quizz);
-                    font-family: 'thunder lc';
-                }
-            }
+        @include desktop {
+            gap: 10px;
         }
     }
 }

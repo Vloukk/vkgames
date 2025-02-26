@@ -52,6 +52,13 @@ button {
   @include button();
 }
 
+.layout {
+  background: var(--background);
+  border: 1px solid var(--background--2);
+  box-shadow: 2px 2px 0px 2px var(--background--2);
+  border-radius: 5px;
+}
+
 input {
   background-color: var(--background);
   border: 1px solid var(--background--3);

@@ -8,6 +8,7 @@ export default function RulesModal({ gameId, onClose }) {
       numThemes: 3,
       randomThemes: true,
       selectedThemes: [],
+      maxPlayers: 6,
     });
 
     const [allThemes, setAllThemes] = useState([]); // ✅ Stocker les thèmes récupérés
@@ -31,61 +32,76 @@ export default function RulesModal({ gameId, onClose }) {
 
     // ✅ Charger les règles existantes depuis Supabase
     useEffect(() => {
-        const fetchRules = async () => {
-          const { data, error } = await supabase
-            .from("games")
-            .select("rules")
-            .eq("id", gameId)
-            .single();
-      
-          if (error) {
-            console.error("❌ Erreur lors de la récupération des règles :", error);
-            return;
-          }
-      
-          if (data.rules) {
-            console.log("✅ Règles récupérées :", data.rules);
-            setRules({
-              ...data.rules,
-              selectedThemes: Array.isArray(data.rules.selectedThemes) ? data.rules.selectedThemes : [], // ✅ Valeur par défaut
-            });
-          }
-        };
-      
-        fetchRules();
-    }, [gameId]);
-      
-
-    // ✅ Sauvegarde automatique dans Supabase à chaque modification
-    const updateRules = async (updatedRules) => {
-        console.log("📥 Mise à jour Supabase avec :", updatedRules);
-      
-        const { error } = await supabase
+      const fetchRules = async () => {
+        const { data, error } = await supabase
           .from("games")
-          .update({ rules: updatedRules })
-          .eq("id", gameId);
-      
+          .select("rules")
+          .eq("id", gameId)
+          .single();
+  
         if (error) {
-          console.error("❌ Erreur lors de la mise à jour des règles :", error);
-        } else {
-          console.log("✅ Règles mises à jour dans Supabase !");
+          console.error("❌ Erreur lors de la récupération des règles :", error);
+          return;
         }
-    };
+  
+        if (data.rules) {
+          console.log("✅ Règles récupérées :", data.rules);
+          setRules({
+            ...data.rules,
+            selectedThemes: Array.isArray(data.rules.selectedThemes) ? data.rules.selectedThemes : [],
+            maxPlayers: data.rules.maxPlayers || 6, // ✅ Vérifie que maxPlayers est bien récupéré
+          });
+        }
+      };
+  
+      fetchRules();
+    }, [gameId]);
+  
       
 
-    // ✅ Gère les modifications des règles
-    const handleChange = (name, value) => {
-        let updatedRules = { ...rules, [name]: value };
+  // ✅ Sauvegarde automatique dans Supabase à chaque modification
+  const updateRules = async (updatedRules) => {
+    console.log("📥 Mise à jour Supabase avec :", updatedRules);
+
+    // ✅ Si `randomThemes` est activé, vide `selectedThemes`
+    if (updatedRules.randomThemes) {
+      updatedRules.selectedThemes = [];
+    }
+
+    const { error } = await supabase
+      .from("games")
+      .update({ rules: updatedRules })
+      .eq("id", gameId);
+
+    if (error) {
+      console.error("❌ Erreur lors de la mise à jour des règles :", error);
+    } else {
+      console.log("✅ Règles mises à jour dans Supabase !");
+    }
+  };
+  
       
-        // ✅ Si on diminue `numThemes`, on réinitialise `selectedThemes`
-        if (name === "numThemes" && value < rules.selectedThemes.length) {
-          updatedRules.selectedThemes = [];
-          console.log("🚨 Changement de nombre de thèmes -> Réinitialisation des thèmes sélectionnés !");
-        }
-      
-        setRules(updatedRules);
-        updateRules(updatedRules);
-    };
+
+  // ✅ Gère les modifications des règles
+  const handleChange = (name, value) => {
+    let updatedRules = { ...rules, [name]: value };
+  
+    // ✅ Réinitialise `selectedThemes` si on réduit `numThemes`
+    if (name === "numThemes" && value < rules.selectedThemes.length) {
+      updatedRules.selectedThemes = [];
+      console.log("🚨 Changement du nombre de thèmes -> Réinitialisation !");
+    }
+  
+    // ✅ Empêche `maxPlayers` d’être inférieur à 1
+    if (name === "maxPlayers" && value < 1) {
+      console.warn("⛔ Le nombre de joueurs ne peut pas être inférieur à 1 !");
+      return;
+    }
+  
+    setRules(updatedRules);
+    updateRules(updatedRules);
+  };
+  
       
 
     // ✅ Gère la sélection/désélection des thèmes
@@ -107,33 +123,36 @@ export default function RulesModal({ gameId, onClose }) {
          
     
     const isValidSelection = () => {
-        return (
-          rules.timeLimit &&
-          rules.hideSessionUrl !== null &&
-          rules.numThemes &&
-          rules.selectedThemes.length === rules.numThemes
-        );
-      };
+      return (
+        rules.timeLimit &&
+        rules.hideSessionUrl !== null &&
+        rules.numThemes &&
+        rules.selectedThemes.length === rules.numThemes &&
+        rules.maxPlayers >= 1
+      );
+    };
       
-      const saveRules = async () => {
-        if (!isValidSelection()) {
-          console.log("❌ Sélection incomplète !");
-          alert("Vous devez remplir toutes les options avant de valider.");
-          return;
-        }
-      
-        console.log("📥 Sauvegarde des règles :", rules);
-        const { error } = await supabase.from("games").update({ rules }).eq("id", gameId);
-      
-        if (error) {
-          console.error("❌ Erreur lors de la mise à jour des règles :", error);
-        } else {
-          console.log("✅ Règles sauvegardées !");
+    const saveRules = async () => {
+      if (!isValidSelection()) {
+        console.log("❌ Sélection incomplète !");
+        alert("Vous devez remplir toutes les options avant de valider.");
+        return;
+      }
+    
+      console.log("📥 Sauvegarde des règles :", rules);
+      const { error } = await supabase.from("games").update({ rules }).eq("id", gameId);
+    
+      if (error) {
+        console.error("❌ Erreur lors de la mise à jour des règles :", error);
+      } else {
+        console.log("✅ Règles sauvegardées !");
+        if (typeof onClose === "function") { // 🔥 Vérifie que `onClose` est bien une fonction
           onClose();
+        } else {
+          console.error("❌ onClose n'est pas défini ou n'est pas une fonction !");
         }
-      };
-      
-            
+      }
+    };        
 
     return (
       <div className="rulesModal">
@@ -173,18 +192,28 @@ export default function RulesModal({ gameId, onClose }) {
                     </div>
                 </div>
                 <div className="left__nb-themes rules">
-                    <p>Nombre de thèmes :</p>
-                    <div className="themes">
-                        {[1, 2, 3, 4, 5, 6].map((num) => (
-                            <button
-                                key={num}
-                                className={rules.numThemes === num ? "selected" : ""}
-                                onClick={() => handleChange("numThemes", num)}
-                            >
-                                {num}
-                            </button>
-                        ))}
-                    </div>
+                  <p>Nombre de thèmes :</p>
+                  <div className="themes">
+                      {[1, 2, 3, 4, 5, 6].map((num) => (
+                          <button
+                              key={num}
+                              className={rules.numThemes === num ? "selected" : ""}
+                              onClick={() => handleChange("numThemes", num)}
+                          >
+                              {num}
+                          </button>
+                      ))}
+                  </div>
+                </div>
+                <div className="left__max-players rules">
+                    <p>Nombre max de joueurs :</p>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="6" 
+                      value={rules.maxPlayers} 
+                      onChange={(e) => handleChange("maxPlayers", Number(e.target.value))} 
+                    />
                 </div>
             </div>
 

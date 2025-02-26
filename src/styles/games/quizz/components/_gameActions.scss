@@ -1,0 +1,21 @@
+@use '../../../mixins' as *;
+
+.gameActions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    grid-area: 1 / 1 / 2 / 2;
+    @include desktop {
+        gap: 10px;
+    }
+    button {
+        font-size: 1.2em;
+        padding: 20px 30px;
+        color: var(--font--color--quizz);
+        font-family: 'thunder lc';
+        @include desktop {
+            padding: 15px 25px;
+            font-size: 1em;
+        }
+    }
+}
