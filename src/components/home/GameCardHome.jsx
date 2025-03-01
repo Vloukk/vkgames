@@ -111,6 +111,7 @@ export default function GameCardHome({ title, text, icon, link, color, animation
     try {
       console.log("🚀 handleCreateGame() appelé avec pseudo :", pseudoInput);
       const gameId = await createQuizzGame(pseudoInput);
+      console.log("Game ID généré :", gameId);
       
       setGame({ id: gameId, host: pseudoInput });
       setPseudo(pseudoInput);

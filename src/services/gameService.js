@@ -1,7 +1,7 @@
   import { supabase } from "@/utils/supabaseClient";
   import { getOrCreateUserId } from "@/utils/userUtils";
 
-  // ✅ Récupérer les infos d'une partie
+  /////////////////////////////////////////////////////////////////////////////// ✅ Récupérer les infos d'une partie
   export const fetchGame = async (gameId) => {
     try {
       if (!gameId) throw new Error("gameId est requis.");
@@ -20,6 +20,7 @@
         .from("players")
         .select("pseudo")
         .eq("uuid", game.host_id)
+        .limit(1)
         .single();
   
       if (hostError) {
@@ -37,7 +38,7 @@
     }
   };  
 
-  // ✅ Créer une partie et ajouter l'hôte automatiquement
+  /////////////////////////////////////////////////////////// ✅ Créer une partie et ajouter l'hôte automatiquement
   export const createGame = async (hostPseudo) => {
     try {
       if (!hostPseudo) throw new Error("Le pseudo de l'hôte est requis.");
@@ -46,10 +47,9 @@
       console.log("🎮 Création d'une nouvelle partie pour :", hostPseudo);
       console.log("🆔 UUID de l'hôte :", userUuid);
   
-      // ✅ Création de la partie avec host_id
       const { data: game, error: gameError } = await supabase
         .from("games")
-        .insert([{ host_id: userUuid, status: "waiting" }]) // 🔥 Remplacement de host_pseudo par host_id
+        .insert([{ host_id: userUuid, status: "waiting" }])
         .select("*")
         .single();
   
@@ -57,8 +57,6 @@
         console.error("❌ Erreur création partie :", gameError);
         throw gameError;
       }
-  
-      console.log("✅ Partie créée avec succès :", game);
   
       if (!game?.id) {
         console.error("❌ Erreur: ID de la partie non récupéré !");
@@ -86,7 +84,7 @@
   };
   
 
-  // ✅ Récupérer les joueurs d'une partie
+  ////////////////////////////////////////////////////////////////// ✅ Récupérer les joueurs d'une partie
   export const fetchPlayers = async (gameId) => {
     try {
       if (!gameId) { 
@@ -98,16 +96,13 @@
 
       const { data, error } = await supabase
         .from("players")
-        .select("id, uuid, pseudo, score, is_ready, is_spectator") // ✅ Vérifie que toutes ces colonnes existent
+        .select("id, uuid, pseudo, score, is_ready, is_spectator")
         .eq("game_id", gameId);
 
       if (error) {
         console.error("❌ Erreur récupération joueurs :", error);
         return [];
       }
-
-      console.log("✅ Liste complète des joueurs (y compris l'host) :", data);
-      console.log("🎮 Nombre de joueurs actifs :", data.filter(p => !p.is_spectator).length);
 
       return data;
     } catch (error) {
@@ -116,8 +111,7 @@
     }
   };
 
-
-  // ✅ Quitter une partie
+  /////////////////////////////////////////////////////////////////////////////// ✅ Quitter une partie
   export const leaveGame = async (gameId, uuid) => {
     try {
       if (!gameId || !uuid) {
@@ -127,7 +121,6 @@
   
       console.log("🔍 Vérification du joueur en base...");
   
-      // ✅ Vérifier si le joueur existe
       const { data: player, error: fetchError } = await supabase
         .from("players")
         .select("is_spectator")
@@ -145,7 +138,7 @@
         return false;
       }
   
-      // ✅ Supprimer le joueur (qu'il soit spectateur ou non)
+      ////////////////////////////////////////////////////// ✅ Supprimer le joueur (qu'il soit spectateur ou non)
       console.log("🗑️ Suppression du joueur :", uuid);
       const { error: deleteError } = await supabase
         .from("players")
@@ -166,9 +159,8 @@
       return false;
     }
   };
-  
 
-  // ✅ Copier le lien de la partie
+  /////////////////////////////////////////////////////////////////////////////// ✅ Copier le lien de la partie
   export const copyGameLink = async (gameId, setCopySuccess) => {
     try {
       const gameLink = `${window.location.origin}/game/${gameId}`;
@@ -180,7 +172,7 @@
     }
   };
 
-  // ✅ Ajouter un joueur à une partie
+ /////////////////////////////////////////////////////////////////////////////// ✅ Ajouter un joueur à une partie
   export const joinGame = async (gameId, pseudo) => {
     try {
       if (!gameId || !pseudo) {
@@ -225,9 +217,6 @@
         localStorage.setItem("uuid", existingPlayer.uuid);
         return existingPlayer;
       }
-
-      // 🚨 TEST CRITIQUE : Pourquoi la condition ne fonctionne pas ?
-      console.log("🔍 Vérification avant ajout : maxPlayers =", maxPlayers, ", currentPlayersCount =", currentPlayersCount);
       
       if (currentPlayersCount >= maxPlayers) {
         console.warn("⛔ La partie est pleine, passage en mode spectateur !");

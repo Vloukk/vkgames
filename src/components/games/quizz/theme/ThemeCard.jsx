@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const ThemeCard = ({ theme, color, isSelected, onSelect }) => {
   return (
@@ -7,10 +7,8 @@ const ThemeCard = ({ theme, color, isSelected, onSelect }) => {
       style={{ backgroundColor: color, cursor: "pointer" }}
       onClick={() => {
         console.log("🖱️ [DEBUG] Click sur la carte du thème :", theme);
-        console.log("📌 [DEBUG] Fonction onSelect passée en prop :", onSelect);
-        onSelect(theme);
+        onSelect();
       }}
-      
     >
       <h3>{theme}</h3>
     </div>
@@ -18,5 +16,3 @@ const ThemeCard = ({ theme, color, isSelected, onSelect }) => {
 };
 
 export default ThemeCard;
-
-

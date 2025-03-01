@@ -59,9 +59,6 @@ export default function PlayersList({ gameId }) {
   const activePlayers = players.filter(player => !player.is_spectator);
   const spectatorsCount = players.filter(player => player.is_spectator).length;
 
-  console.log("📡 Liste des joueurs actifs :", activePlayers);
-  console.log("👀 Nombre de spectateurs :", spectatorsCount);
-
   return (
     <div className="playersList">
       <ul>

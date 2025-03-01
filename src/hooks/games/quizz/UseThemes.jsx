@@ -2,79 +2,84 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import useGameStore from "@/store/quizz/gameStore";
 
-//sécurité
-import useLoopGuard from "@/utils/sécurity/useLoopGard";
-
 export function useThemes(gameId, playerId) {
-    const [themes, setThemes] = useState([]);tu
+    const [themes, setThemes] = useState([]);
     const [selectedTheme, setSelectedTheme] = useState(null);
     const game = useGameStore((state) => state.game);
 
+    // ✅ 1. Récupérer les thèmes depuis les règles du jeu
     useEffect(() => {
+        console.log("📡 [DEBUG] game.rules.availableThemes :", game?.rules?.availableThemes);
         if (game?.rules?.availableThemes) {
-            console.log("📡 Mise à jour des thèmes dans useThemes :", game.rules.availableThemes);
             setThemes(game.rules.availableThemes);
         }
-    }, [game?.rules?.availableThemes]);
+    }, [game?.rules?.availableThemes]);    
 
+    // ✅ 2. Récupérer le thème déjà sélectionné par le joueur
     useEffect(() => {
-        useLoopGuard("fetchThemes", 3, 5000); // 🔥 Max 3 appels en 5 sec
-
-        async function fetchThemes() {
-            console.log("🔄 Récupération des thèmes après mise à jour des règles...");
-
+        if (!playerId) return;
+    
+        async function fetchSelectedTheme() {
+            console.log("🔍 Vérification du thème sélectionné pour le joueur :", playerId);
+    
             const { data, error } = await supabase
-                .from("games")
-                .select("rules")
-                .eq("id", gameId)
+                .from("players")
+                .select("selected_theme_id")
+                .eq("uuid", playerId)
                 .single();
-
+    
             if (error) {
-                console.error("❌ Erreur lors de la récupération des thèmes :", error);
+                console.error("❌ Erreur récupération du thème du joueur :", error);
                 return;
             }
-
-            if (!data?.rules || !data.rules.availableThemes) {
-                console.warn("⚠️ Aucune règle trouvée ou availableThemes vide.");
-                return;
+    
+            console.log("🎯 [DEBUG] Thème sélectionné récupéré :", data?.selected_theme_id);
+    
+            if (data?.selected_theme_id) {
+                setSelectedTheme(data.selected_theme_id);
             }
-
-            console.log("🎨 Nouvelles règles récupérées :", data.rules);
-            setThemes(data.rules.availableThemes);
         }
+    
+        fetchSelectedTheme();
+    }, [playerId]);    
 
-        if (gameId) fetchThemes();
-    }, [gameId]);
-
+    // ✅ 3. Écouter les mises à jour en temps réel sur `selected_theme_id`
     useEffect(() => {
         if (!gameId) return;
 
-        console.log("📡 Écoute en temps réel des mises à jour des thèmes...");
+        console.log("📡 [DEBUG] Abonnement Realtime pour les thèmes du jeu :", gameId);
 
         const channel = supabase
-          .channel(`game-themes-${gameId}`) // ✅ Correct
+            .channel(`theme_selection_${gameId}`) // Canal unique par partie
             .on(
-              "postgres_changes",
-              { event: "UPDATE", schema: "public", table: "games", filter: `id=eq.${gameId}` },
-              (payload) => {
-                if (payload.new.rules.availableThemes) {
-                  setThemes(payload.new.rules.availableThemes);
+                "postgres_changes", 
+                { 
+                    event: "UPDATE", 
+                    schema: "public", 
+                    table: "players",
+                    filter: `game_id=eq.${gameId}`
+                },
+                (payload) => {
+                    console.log("🟢 [REALTIME] Mise à jour détectée :", payload.new.selected_theme_id);
+                    
+                    // Si c'est le joueur actuel, mettre à jour son thème
+                    if (payload.new.uuid === playerId) {
+                        setSelectedTheme(payload.new.selected_theme_id);
+                    }
                 }
-              }
             )
             .subscribe();
 
         return () => {
-          supabase.removeChannel(channel);
+            supabase.removeChannel(channel);
         };
-    }, [gameId]);
+    }, [gameId, playerId]);
 
-    ////////////////////////
-
+    // ✅ 4. Fonction pour sélectionner un thème
     async function selectTheme(themeName) {
-        console.log("🔥 [DEBUG] selectTheme() appelée avec theme :", themeName);
+        console.log("🔥 [DEBUG] Thème sélectionné :", themeName);
 
-        // 🔍 Vérifie d'abord si l'UUID du thème existe
+        // 🔍 Récupérer l'ID du thème
         const { data: themeData, error: themeError } = await supabase
             .from("themes")
             .select("id")
@@ -82,58 +87,30 @@ export function useThemes(gameId, playerId) {
             .single();
 
         if (themeError) {
-            console.error("❌ Erreur lors de la récupération de l’UUID du thème :", themeError);
+            console.error("❌ Erreur lors de la récupération du thème :", themeError);
             return;
         }
 
         const themeId = themeData?.id;
-        console.log("🎯 UUID du thème sélectionné :", themeId);
-
         if (!themeId) {
-            console.error("❌ Aucun UUID trouvé pour le thème :", themeName);
+            console.error("❌ Aucun ID trouvé pour le thème :", themeName);
             return;
         }
 
-        // 🔄 Mise à jour du thème dans la table `players`
+        // 🔄 Mettre à jour le thème sélectionné par le joueur
         const { error: updateError } = await supabase
             .from("players")
             .update({ selected_theme_id: themeId })
             .eq("uuid", playerId);
 
         if (updateError) {
-            console.error("❌ Erreur lors de la mise à jour du thème :", updateError);
+            console.error("❌ Erreur lors de la mise à jour du thème du joueur :", updateError);
             return;
         }
 
         console.log("✅ Thème mis à jour avec succès !");
-
-        // 🔍 Attendre un peu avant de récupérer la mise à jour pour éviter le problème de délai Supabase
-        setTimeout(async () => {
-            const { data: checkData, error: checkError } = await supabase
-                .from("players")
-                .select("selected_theme_id")
-                .eq("uuid", playerId);
-
-            if (checkError) {
-                console.error("❌ [ERREUR] Impossible de récupérer après update :", checkError);
-            } else {
-                console.log("🎨 [VÉRIFICATION] selected_theme_id après update :", checkData);
-
-                if (checkData && checkData.length > 0 && checkData[0].selected_theme_id) {
-                    console.log("🎨 [Mise à jour] Nouvelle valeur de selectedTheme :", checkData[0].selected_theme_id);
-                    setSelectedTheme(checkData[0].selected_theme_id); // ✅ Mets à jour l'état local
-                } else {
-                    console.warn("⚠️ Aucun selected_theme_id trouvé après l'update !");
-                }
-            }
-        }, 1000); // ⏳ Attente de 500ms pour que Supabase enregistre la donnée
+        setSelectedTheme(themeId);
     }
-
-    useEffect(() => {
-        console.log("🎯 [DEBUG] selectedTheme a changé :", selectedTheme);
-    }, [selectedTheme]);
-
-    console.log("🔗 [DEBUG] useThemes() retourne selectTheme :", selectTheme);
 
     return { themes, selectedTheme, selectTheme };
 }
