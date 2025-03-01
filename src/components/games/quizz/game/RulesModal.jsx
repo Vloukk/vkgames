@@ -79,26 +79,13 @@ export default function RulesModal({ gameId, onClose }) {
   
     console.log("✅ Règles enregistrées avec succès !");
   
-    //🔄 Récupération immédiate des nouvelles règles
-    const { data, error: fetchError } = await supabase
-      .from("games")
-      .select("rules")
-      .eq("id", gameId)
-      .single();
-  
-    if (fetchError) {
-      console.error("❌ Erreur lors de la récupération des nouvelles règles :", fetchError);
-      return;
-    }
-  
-    console.log("🔄 Règles mises à jour récupérées :", data.rules);
-  
-    // 🏗️ Mettre à jour l'état local et le store global
-    setRules(data.rules);
+    // 🏗️ Mise à jour immédiate de Zustand
     useGameStore.setState((state) => ({
-      game: { ...state.game, rules: data.rules },
+      game: { ...state.game, rules: newRules },
     }));
-  };      
+  
+    console.log("♻️ [DEBUG] Zustand mis à jour immédiatement avec les nouvelles règles :", newRules);
+  };        
 
   ///////////////////////////////////////////////////////////// ✅ Gère les modifications des règles
   const handleChange = (name, value) => {
@@ -154,31 +141,40 @@ export default function RulesModal({ gameId, onClose }) {
     /////////////////////////////////////////////////////:
     const saveRules = async () => {
       if (!isValidSelection()) {
-          alert("Vous devez remplir toutes les options avant de valider.");
-          return;
+        alert("Vous devez remplir toutes les options avant de valider.");
+        return;
       }
-  
+    
       const updatedRules = {
-          ...rules,
-          availableThemes: allThemes, // 🔥 Assure-toi que `availableThemes` contient bien tous les thèmes
+        ...rules,
+        availableThemes: allThemes, // 🔥 Assure-toi que `availableThemes` contient bien tous les thèmes
       };
-  
+    
       console.log("📥 Sauvegarde des règles avec availableThemes :", updatedRules);
-  
+    
       const { error } = await supabase
-          .from("games")
-          .update({ rules: updatedRules })
-          .eq("id", gameId);
-  
+        .from("games")
+        .update({ rules: updatedRules })
+        .eq("id", gameId);
+    
       if (error) {
-          console.error("❌ Erreur lors de la mise à jour des règles :", error);
+        console.error("❌ Erreur lors de la mise à jour des règles :", error);
       } else {
-          console.log("✅ Règles sauvegardées !");
-          if (typeof onClose === "function") {
-              onClose();
-          }
+        console.log("✅ Règles sauvegardées !");
+    
+        // 🏗️ Mise à jour immédiate de Zustand
+        useGameStore.setState((state) => ({
+          game: { ...state.game, rules: updatedRules },
+        }));
+    
+        console.log("♻️ [DEBUG] Zustand mis à jour immédiatement avec les nouvelles règles :", updatedRules);
+    
+        if (typeof onClose === "function") {
+          onClose();
+        }
       }
-  };      
+    };
+          
             
 
     return (

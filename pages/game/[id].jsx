@@ -37,6 +37,18 @@ export default function GamePage() {
     }
   }, [game, pseudo, gameId, uuid, isSpectator]);
 
+  useEffect(() => {
+    console.log("🟢 [DEBUG] Vérification pour afficher ThemeSelectionModal...");
+    console.log("🎭 [DEBUG] game.rules.selectedThemes :", game?.rules?.selectedThemes);
+    console.log("👤 [DEBUG] Spectateur :", isSpectator);
+  
+    // Si l'hôte n'a pas encore sélectionné tous les thèmes requis, on affiche la modal
+    if (game?.rules?.selectedThemes?.length < game?.rules?.numThemes && !isSpectator) {
+      console.log("🎨 [DEBUG] Activation de ThemeSelectionModal !");
+      setShowThemeModal(true);
+    }
+  }, [game?.rules?.selectedThemes, isSpectator]); // ✅ On surveille bien selectedThemes  
+
   // Afficher la modale si le joueur est l'hôte et les thèmes sont chargés
   useEffect(() => {
     if (game?.rules?.availableThemes?.length > 0 && !isSpectator) {
@@ -50,6 +62,7 @@ export default function GamePage() {
   //////////////////////////////////////////////////////////////
   console.log("📡 [DEBUG] showThemeModal :", showThemeModal);
   console.log("📡 [DEBUG] game.rules.selectedThemes :", game?.rules?.selectedThemes);
+  console.log("📡 [DEBUG] game.rules.selectedThemes envoyé à ThemeSelectionModal :", game?.rules?.selectedThemes);
 
   return (
     <div className="gameQuizz">
@@ -69,7 +82,6 @@ export default function GamePage() {
       {/* ✅ Afficher RulesModal uniquement si le joueur est l'hôte */}
       {gameId && showRulesModal && <RulesModal gameId={gameId} onClose={() => setShowRulesModal(false)} />}
 
-      <button onClick={() => setShowThemeModal(true)}>Ouvrir ThemeModal</button>
       {showThemeModal && (
         <ThemeSelectionModal
           gameId={gameId}
