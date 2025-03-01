@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import useGameStore from "@/store/quizz/gameStore";
 
+//sécurité
+import useLoopGuard from "@/utils/sécurity/useLoopGard";
+
 export function useThemes(gameId, playerId) {
     const [themes, setThemes] = useState([]);tu
     const [selectedTheme, setSelectedTheme] = useState(null);
@@ -15,6 +18,8 @@ export function useThemes(gameId, playerId) {
     }, [game?.rules?.availableThemes]);
 
     useEffect(() => {
+        useLoopGuard("fetchThemes", 3, 5000); // 🔥 Max 3 appels en 5 sec
+
         async function fetchThemes() {
             console.log("🔄 Récupération des thèmes après mise à jour des règles...");
 

@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabaseClient";
 import useGameStore from "@/store/quizz/gameStore";
 
+// sécurité 
+// (évite les boucles infinies)
+import useLoopGuard from "@/utils/sécurity/useLoopGard";
+
 const useGame = (gameId, pseudo) => {
   const [players, setPlayers] = useState([]);
   const [uuid, setUuid] = useState(null);
@@ -14,6 +18,7 @@ const useGame = (gameId, pseudo) => {
 
   // Utiliser `useEffect` pour récupérer les infos du jeu et écouter les changements en temps réel
   useEffect(() => {
+    useLoopGuard("fetchGame", 5, 5000);
     if (!gameId) {
       console.error("❌ gameId est manquant !");
       return;
@@ -58,35 +63,35 @@ const useGame = (gameId, pseudo) => {
     };
 
     fetchGame();
-  }, [gameId, setGame, game?.rules]); // Dépendance à `game?.rules` pour éviter un appel répété
+  }, [gameId, setGame, game?.rules]);
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   useEffect(() => {
-  if (!gameId) return;
-
-  const channel = supabase
-    .channel(`game-updates-${gameId}`)
-    .on(
-      "postgres_changes",
-      { event: "UPDATE", schema: "public", table: "games", filter: `id=eq.${gameId}` },
-      (payload) => {
-        if (payload.new.rules && JSON.stringify(game?.rules) !== JSON.stringify(payload.new.rules)) {
-          console.log("🎯 Nouvelles règles reçues :", payload.new.rules);
-          setGame((state) => {
-            if (JSON.stringify(state.rules) !== JSON.stringify(payload.new.rules)) {
-              return { ...state, rules: payload.new.rules };
-            }
-            return state;
-          });
+    useLoopGuard("supabaseGameUpdates", 10, 5000);
+  
+    if (!gameId) return;
+  
+    const channel = supabase
+      .channel(`game-updates-${gameId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "games", filter: `id=eq.${gameId}` },
+        (payload) => {
+          if (payload.new.rules && JSON.stringify(game?.rules) !== JSON.stringify(payload.new.rules)) {
+            console.log("🎯 Nouvelles règles reçues :", payload.new.rules);
+            setGame((state) => ({
+              ...state,
+              rules: payload.new.rules,
+            }));
+          }
         }
-      }
-    )
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}, [gameId]);
-
+      )
+      .subscribe();
+  
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [gameId]);
 
   return {
     game,

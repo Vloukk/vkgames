@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../utils/supabaseClient";
 
+//sécurité
+import useLoopGuard from "@/utils/sécurity/useLoopGard";
+
 export default function RulesModal({ gameId, onClose }) {
   const [rules, setRules] = useState({
     selectedThemes: [],        // Thèmes choisis
@@ -34,6 +37,8 @@ export default function RulesModal({ gameId, onClose }) {
 
     // ✅ Charger les règles existantes depuis Supabase
     useEffect(() => {
+      useLoopGuard("fetchRules", 3, 5000)
+
       const fetchRules = async () => {
         const { data, error } = await supabase
           .from("games")
