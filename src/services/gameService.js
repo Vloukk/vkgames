@@ -118,49 +118,47 @@
 
 
   // ✅ Quitter une partie
-  export const leaveGame = async (gameId) => {
+  export const leaveGame = async (gameId, uuid) => {
     try {
-      const userUuid = localStorage.getItem("uuid");
-      if (!gameId || !userUuid) {
+      if (!gameId || !uuid) {
         console.error("❌ Erreur: gameId ou uuid manquant !");
         return false;
       }
-
+  
       console.log("🔍 Vérification du joueur en base...");
-
+  
+      // ✅ Vérifier si le joueur existe
       const { data: player, error: fetchError } = await supabase
         .from("players")
         .select("is_spectator")
         .eq("game_id", gameId)
-        .eq("uuid", userUuid)
+        .eq("uuid", uuid)
         .single();
-
+  
       if (fetchError) {
         console.error("❌ Erreur lors de la récupération du joueur :", fetchError);
         return false;
       }
-
+  
       if (!player) {
         console.warn("⚠️ Joueur introuvable !");
         return false;
       }
-
-      // 🔥 Suppression si le joueur est spectateur
-      if (player.is_spectator) {
-        console.log("👀 Suppression du spectateur :", userUuid);
-        const { error: deleteError } = await supabase
-          .from("players")
-          .delete()
-          .eq("game_id", gameId)
-          .eq("uuid", userUuid);
-
-        if (deleteError) {
-          console.error("❌ Erreur lors de la suppression du spectateur :", deleteError);
-          return false;
-        }
-        console.log("✅ Spectateur supprimé avec succès !");
+  
+      // ✅ Supprimer le joueur (qu'il soit spectateur ou non)
+      console.log("🗑️ Suppression du joueur :", uuid);
+      const { error: deleteError } = await supabase
+        .from("players")
+        .delete()
+        .eq("game_id", gameId)
+        .eq("uuid", uuid);
+  
+      if (deleteError) {
+        console.error("❌ Erreur lors de la suppression du joueur :", deleteError);
+        return false;
       }
-
+  
+      console.log("✅ Joueur supprimé avec succès !");
       localStorage.removeItem("uuid");
       return true;
     } catch (error) {
@@ -168,6 +166,7 @@
       return false;
     }
   };
+  
 
   // ✅ Copier le lien de la partie
   export const copyGameLink = async (gameId, setCopySuccess) => {

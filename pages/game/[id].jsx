@@ -94,24 +94,7 @@ export default function GamePage() {
       setShowRulesModal(true);
       localStorage.setItem(`rulesSeen-${gameId}`, "true");
     }
-  }, [game, pseudo, gameId, uuid, isSpectator]);
-
-  ///////////////////////////////////// enleve le spectateur si il quitte la page
-  useEffect(() => {
-    const handleBeforeUnload = async () => {
-      console.log("🚪 Détection de la fermeture de la page !");
-      if (uuid) {
-        console.log("👀 Suppression du spectateur en cours...");
-        await leaveGame(gameId);
-      }
-    };
-  
-    window.addEventListener("beforeunload", handleBeforeUnload);
-  
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [gameId, uuid]);   
+  }, [game, pseudo, gameId, uuid, isSpectator]); 
 
   if (!game) return <p>Chargement...</p>;
 
