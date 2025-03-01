@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { fetchGame, fetchPlayers, joinGame } from "@/services/gameService";
 import useGameStore from "@/store/quizz/gameStore";
+import { supabase } from "@/utils/supabaseClient";
 
 // Components
 import GameActions from "../../src/components/games/quizz/GameActions";
@@ -53,13 +54,23 @@ export default function GamePage() {
   // ✅ Récupérer les infos de la partie après que gameId soit défini
   useEffect(() => {
     if (!gameId) return;
-
-    fetchGame(gameId).then((data) => {
+  
+    fetchGame(gameId).then(async (data) => {
       if (data) {
-        setGame(data);
+        // 🔥 Rechercher le pseudo de l'hôte dans la liste des joueurs
+        const { data: hostPlayer } = await supabase
+          .from("players")
+          .select("pseudo")
+          .eq("uuid", data.host_id)
+          .single();
+  
+        setGame({
+          ...data,
+          host_pseudo: hostPlayer?.pseudo || "Hôte inconnu", // 🔥 Ajout du pseudo de l'hôte
+        });
       }
     });
-  }, [gameId]);
+  }, [gameId]);  
 
   // ✅ Récupérer les joueurs après que gameId et uuid soient définis
   useEffect(() => {

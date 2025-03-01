@@ -1,0 +1,10 @@
+@use '../../../../mixins' as *;
+
+.themeCard {
+    border: 1px solid red;
+    background-color: var(background-color);
+    @include desktop {
+        width: 200px;
+        height: 500px;
+    }
+}

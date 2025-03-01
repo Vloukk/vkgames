@@ -2,14 +2,16 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../../utils/supabaseClient";
 
 export default function RulesModal({ gameId, onClose }) {
-    const [rules, setRules] = useState({
-      timeLimit: 30,
-      hideSessionUrl: false,
-      numThemes: 3,
-      randomThemes: true,
-      selectedThemes: [],
-      maxPlayers: 6,
-    });
+  const [rules, setRules] = useState({
+    selectedThemes: [],        // Thèmes choisis
+    maxPlayers: 1,             // Nombre max de joueurs
+    roundTime: 30,             // Temps de réponse en secondes
+    hideUrl: false,            // Masquer l'URL (true/false)
+    themeSelectionCount: 0, // À définir par la suite
+    numThemes: 1,           // À définir en fonction des règles
+    allowRandomThemes: true,   // Autoriser thèmes aléatoires
+    availableThemes: []
+  });
 
     const [allThemes, setAllThemes] = useState([]); // ✅ Stocker les thèmes récupérés
 
