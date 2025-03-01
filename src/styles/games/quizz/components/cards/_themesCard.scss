@@ -1,10 +1,27 @@
 @use '../../../../mixins' as *;
 
 .themeCard {
-    border: 1px solid red;
-    background-color: var(background-color);
+    border-radius: 5px;
+    color: rgba(0, 0, 0, 0.525);
+    font-weight: medium;
+    &__content {
+        border: 1px solid rgba(0, 0, 0, 0.348);
+        border-radius: 5px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        h3 {
+            font-size: 1.2em;
+        }
+    }
     @include desktop {
+        width: 150px;
+        height: 200px;
+    }
+    @include large {
+        padding: 10px;
         width: 200px;
-        height: 500px;
+        height: 300px;
     }
 }

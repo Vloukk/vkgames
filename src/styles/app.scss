@@ -16,6 +16,8 @@
 @use './games/quizz/components/readyStatus';
 @use './games/quizz/components/gameActions';
 @use './games/quizz/components/pseudoModal';
+@use './games/quizz/components/themeSelectionModal';
+@use './games/quizz/components/cards/themesCard';
 
 @font-face {
     font-family: 'thunder';
