@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabaseClient";
+import useThemeColorStore from "@/store/quizz/themeColorStore"; // Import du store des couleurs
 
 export default function PlayersList({ gameId }) {
   const [players, setPlayers] = useState([]);
+  const { getColor } = useThemeColorStore(); // Récupérer les couleurs des thèmes
 
   useEffect(() => {
     if (!gameId) return;
@@ -10,7 +12,7 @@ export default function PlayersList({ gameId }) {
     const fetchPlayers = async () => {
       const { data, error } = await supabase
         .from("players")
-        .select("id, pseudo, score, is_ready, is_spectator") // ✅ Ajout de `is_spectator`
+        .select("id, pseudo, score, is_ready, is_spectator, selected_theme_id") // ✅ Ajout de selected_theme_id
         .eq("game_id", gameId);
 
       if (error) {
@@ -31,17 +33,14 @@ export default function PlayersList({ gameId }) {
         console.log("🔄 Changement détecté dans players :", payload);
 
         if (payload.eventType === "INSERT") {
-          console.log("🆕 Nouveau joueur ajouté :", payload.new);
           setPlayers((prev) => [...prev, payload.new]);
         }
 
         if (payload.eventType === "DELETE") {
-          console.log("❌ Joueur supprimé :", payload.old);
           setPlayers((prev) => prev.filter((p) => p.id !== payload.old.id));
         }
 
         if (payload.eventType === "UPDATE") {
-          console.log("🔄 Mise à jour joueur :", payload.new);
           setPlayers((prev) =>
             prev.map((p) => (p.id === payload.new.id ? payload.new : p))
           );
@@ -63,12 +62,19 @@ export default function PlayersList({ gameId }) {
     <div className="playersList">
       <ul>
         {activePlayers.length > 0 ? (
-          activePlayers.map((player) => (
-            <li key={player.id}> {/* ✅ Correction ici avec `player.id` */}
-              {player.pseudo} - Score: {player.score} - 
-              {player.is_ready ? " ✅ Prêt" : " ❌ Pas prêt"}
-            </li>
-          ))
+          activePlayers.map((player) => {
+            const playerThemeColor = player.selected_theme_id ? getColor(player.selected_theme_id) : "#030303";
+
+            return (
+              <li 
+                key={player.id} 
+                style={{ backgroundColor: playerThemeColor }}
+              >
+                {player.pseudo} - Score: {player.score} - 
+                {player.is_ready ? " ✅ Prêt" : " ❌ Pas prêt"}
+              </li>
+            );
+          })
         ) : (
           <p>Aucun joueur pour l’instant...</p>
         )}

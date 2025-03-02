@@ -1,12 +1,120 @@
 "use client";  // Ajoute cette ligne tout en haut
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 
 const Logo = () => {
+    const logoRef = useRef(null);
+  
+  useEffect(() => {
+    if (!logoRef.current) return;
+
+    const elements = Array.from(logoRef.current.children);
+
+    const setOverflowHidden = () => {
+        if (logoRef.current) {
+            logoRef.current.style.overflow = "hidden";
+        }
+    };
+    
+    const setOverflowVisible = () => {
+        if (logoRef.current) {
+            logoRef.current.style.overflow = "visible";
+        }
+    };    
+
+    const waveEffect = () => {
+        return gsap.timeline().to(elements, {
+            y: (i) => (i % 2 === 0 ? -10 : 10), // Haut / Bas en alternance
+            rotation: (i) => (i % 2 === 0 ? 5 : -5), // Inclinaison légère
+            duration: 0.6,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: 3, // On fait 3 cycles et on s'arrête
+            stagger: 0.1 // Décalage progressif pour effet vague
+        });
+    };       
+
+    const smileyMove = (el) => {
+        if (!el) return;
+    
+        gsap.timeline()
+        .to(el, {
+            y: -10, // Légère montée avant de plonger (anticipation)
+            duration: 0.2,
+            ease: "power1.out"
+        })
+        .to(el, {
+            y: 100, // Descente principale
+            rotation: 20, // Légère inclinaison pour plus de dynamique
+            duration: 0.6,
+            ease: "power2.in"
+        })
+        .set(el, { x: -100, y: 0, rotation: -360 }) // Téléportation rapide
+        .to(el, {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            duration: 1.2,
+            ease: "elastic.out(1, 0.6)" // Retour avec un rebond naturel
+        });
+    };
+    
+
+    const elasticEffect = () => {
+        elements.forEach((el, index) => {
+            const delay = index * 0.1; // Décalage progressif
+            gsap.to(el, {
+                scaleX: 1.5,
+                scaleY: 0.5,
+                duration: 0.4,
+                ease: "power2.out",
+                delay: delay,
+                onComplete: () => {
+                    gsap.to(el, { 
+                        scaleX: 0.8, 
+                        scaleY: 1.2, 
+                        duration: 0.4, 
+                        ease: "power2.out",
+                        onComplete: () => {
+                            gsap.to(el, { 
+                                scaleX: 1.2, 
+                                scaleY: 0.8, 
+                                duration: 0.4, 
+                                ease: "power2.out",
+                                onComplete: () => {
+                                    gsap.to(el, { 
+                                        scaleX: 1, 
+                                        scaleY: 1, 
+                                        duration: 0.4, 
+                                        ease: "power2.out"
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    };    
+
+    const smiley = logoRef.current.querySelector('.smiley');
+    
+    const timeline = gsap.timeline({ repeat: -1 });
+    timeline
+    .add(waveEffect()) // Effet drapeau (wave)
+    .call(() => {}, [], "+=30") // Pause de 30s après waveEffect
+    .call(setOverflowHidden, [], "+=0") // Activation de overflow:hidden AVANT smileyMove
+    .call(() => smileyMove(logoRef.current?.querySelector('.smiley')), [], "+=1") // Animation du smiley
+    .call(() => {}, [], "+=30") // Pause de 30s après smileyMove
+    .call(setOverflowVisible, [], "+=0") // Désactivation APRES que le smiley revienne
+    .call(() => elasticEffect(), [], "+=2") // Animation élastique des lettres
+    .call(() => {}, [], "+=30"); // Pause de 30s après elasticEffect
+
+}, []);
     
   return (
-    <div className='logo'>
+    <div className='logo' ref={logoRef}>
         <div className="v">
             <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2.01772 0.00146484C0.90747 0.00146484 0.00396729 0.911308 0.00396729 2.02935V18.1564C0.00396729 18.6986 0.22548 19.2272 0.610778 19.607L8.67652 27.5442C9.05511 27.916 9.55452 28.1214 10.0835 28.1214H18.2459C18.7815 28.1214 19.285 27.9119 19.6649 27.5334L26.7869 20.4155L28.1294 19.0744L28.1965 19.0068V0.00146484H2.01772ZM26.854 18.443L26.7869 18.5106L18.7184 26.5735C18.5922 26.6992 18.4244 26.7695 18.2459 26.7695H10.0835C9.9076 26.7695 9.74113 26.7006 9.61493 26.5776L1.54919 18.6404C1.42031 18.5133 1.34647 18.3376 1.34647 18.1564V2.02935C1.34647 1.65622 1.64719 1.35339 2.01772 1.35339H26.854V18.443Z" fill="black"/>

@@ -5,6 +5,7 @@ import useGameStore from "@/store/quizz/gameStore";
 export function useThemes(gameId, playerId) {
     const [themes, setThemes] = useState([]);
     const [selectedTheme, setSelectedTheme] = useState(null);
+    const [selectedThemeName, setSelectedThemeName] = useState(null);
     const game = useGameStore((state) => state.game);
 
     console.log("🛠️ [DEBUG] useThemes monté avec :", { gameId, playerId });
@@ -24,28 +25,44 @@ export function useThemes(gameId, playerId) {
             console.warn("⚠️ [WARNING] fetchSelectedTheme() : playerId est undefined !");
             return;
         }
-
+    
         console.log("🔍 [DEBUG] Vérification du thème sélectionné pour le joueur :", playerId);
-
+    
         const { data, error } = await supabase
             .from("players")
             .select("selected_theme_id")
             .eq("uuid", playerId)
             .single();
-
+    
         if (error) {
             console.error("❌ Erreur récupération du thème du joueur :", error);
             return;
         }
-
-        console.log("🎯 [DEBUG] Thème sélectionné récupéré :", data?.selected_theme_id);
-
+    
+        console.log("🎯 [DEBUG] Thème sélectionné récupéré (ID) :", data?.selected_theme_id);
+    
         if (data?.selected_theme_id) {
             setSelectedTheme(data.selected_theme_id);
+    
+            // ✅ Maintenant, récupérons le nom du thème
+            const { data: themeData, error: themeError } = await supabase
+                .from("themes")
+                .select("name")
+                .eq("id", data.selected_theme_id)
+                .single();
+    
+            if (themeError) {
+                console.error("❌ Erreur lors de la récupération du nom du thème :", themeError);
+            } else {
+                console.log("🎯 [DEBUG] Nom du thème récupéré :", themeData.name);
+                setSelectedThemeName(themeData.name); // ✅ Stocke le nom du thème
+    
+                // 🔥 Vérifier si `selectedThemeName` est bien mis à jour
+                console.log("✅ [DEBUG] selectedThemeName après setState :", themeData.name);
+            }
         }
-    }
+    }    
 
-    // ✅ Exécuter fetchSelectedTheme() au chargement du composant
     useEffect(() => {
         fetchSelectedTheme();
     }, [playerId]);
@@ -140,5 +157,5 @@ export function useThemes(gameId, playerId) {
         }
     }
 
-    return { themes, selectedTheme, selectTheme };
+    return { themes, selectedTheme, selectTheme, selectedThemeName };
 }

@@ -92,7 +92,7 @@ export default function GamePage() {
 
       <div className="gameQuizz__utils">
         {!isSpectator && <GameActions gameId={gameId} uuid={uuid} router={router} />}
-        {!isSpectator && <PlayerInfos pseudo={pseudo} selectedTheme={game?.rules?.selectedTheme || ""} />}
+        {!isSpectator && <PlayerInfos pseudo={pseudo} selectedTheme={game?.rules?.selectedTheme || ""} gameId={gameId} playerId={uuid} />}
         <PlayersList gameId={gameId} />
         {!isSpectator && <ReadyStatus gameId={gameId} uuid={uuid} isGameStarted={game?.is_started} />}
       </div>
