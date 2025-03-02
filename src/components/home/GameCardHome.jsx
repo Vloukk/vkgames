@@ -71,7 +71,7 @@ export default function GameCardHome({ title, text, icon, link, color, animation
       gsap.to(createElement, {
         opacity: 0,
         y: 20, // Ou déplace le formulaire vers le bas pour simuler sa disparition
-        duration: 0.8,
+        duration: 1,
         ease: "power2.out",
       });
     } else {
@@ -116,8 +116,6 @@ export default function GameCardHome({ title, text, icon, link, color, animation
       setGame({ id: gameId, host: pseudoInput });
       setPseudo(pseudoInput);
       localStorage.setItem("pseudo", pseudoInput); // ✅ Sauvegarde dans localStorage
-  
-      console.log("✅ Pseudo enregistré avant redirection :", pseudoInput);
   
       router.push(`/game/${gameId}`);
     } catch (error) {

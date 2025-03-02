@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 // Components
 import Header from '@/components/home/Header';
 import GameCardHome from '@/components/home/GameCardHome';
+import GameCardSelector from '@/components/home/GameCardSelector';
 
 // Datas
 import GameDatas from '@/datas/GameCard.json';
@@ -21,7 +22,16 @@ export default function Home() {
       <Header />
       <div className="HomePage__gridGame">
         <div className="gridGame__selector">
-          <div className="selector__grid"></div>
+          <div className="selector__grid">
+            {games.map((game) => (
+              <GameCardSelector
+                key={game.id}
+                title={game.title}
+                link={game.link}
+                color={game.color}
+              />
+            ))}
+          </div>
         </div>
         <div className="gridGame__list">
           {games.map((game, index) => ( // Correction de la variable en `game`

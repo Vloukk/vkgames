@@ -11,9 +11,9 @@
     border-radius: 5px !important;
     box-sizing: border-box;
     height: 35vh;
-    transition: height .3s ease-in-out;
+    transition: height .4s ease-in-out;
     @include desktop {
-        height: 45vh;
+        height: 40vh;
     }
     @include large {
         height: 30vh;
