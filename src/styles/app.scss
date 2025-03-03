@@ -8,6 +8,7 @@
 @use './home/index';
 @use './home/gameCardHome.scss';
 @use './home/gameCardSelector';
+@use './home/pageTransition';
 
 //games/quizz
 @use './games/quizz/quizzPage';

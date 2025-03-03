@@ -124,16 +124,16 @@
                         font-family: 'thunder';
                     }
                 }
-                .save-button {
-                    background: var(--color--quizz);
-                    border: 1px solid var(--color--quizz--2);
-                    box-shadow: 2px 2px 0px 2px var(--color--quizz--2) !important;
-                    color: var(--foreground);
-                    margin-top: 10px;
-                    padding: 10px 15px;
-                    width: fit-content;
-                }
             }
         }
+    }
+    .save-button {
+        background: var(--color--quizz);
+        border: 1px solid var(--color--quizz--2);
+        box-shadow: 2px 2px 0px 2px var(--color--quizz--2) !important;
+        color: var(--foreground);
+        margin-top: 10px;
+        padding: 10px 15px;
+        width: fit-content;
     }
 }

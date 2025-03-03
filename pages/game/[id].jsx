@@ -14,6 +14,7 @@ import ReadyStatus from "@/components/games/quizz/ReadyStatus";
 import RulesModal from "@/components/games/quizz/game/RulesModal";
 import PseudoModal from "@/components/games/quizz/player/PseudoModal";
 import ThemeSelectionModal from "@/components/games/quizz/theme/ThemeSelectionModal";
+import PageTransition from "@/components/utils/PageTransition";
 
 export default function GamePage() {
   const router = useRouter();
@@ -25,6 +26,19 @@ export default function GamePage() {
 
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  
+  const [showTransition, setShowTransition] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && gameId) {
+      console.log("🚀 Affichage de la transition...");
+      
+      // Timer pour masquer la transition après 2 secondes
+      setTimeout(() => {
+        setShowTransition(false);
+      }, 20000);
+    }
+  }, [gameId]);
 
   // ✅ Afficher la modale des règles pour l'hôte
   useEffect(() => {
@@ -38,9 +52,6 @@ export default function GamePage() {
   }, [game, pseudo, gameId, uuid, isSpectator]);
 
   useEffect(() => {
-    console.log("🟢 [DEBUG] Vérification pour afficher ThemeSelectionModal...");
-    console.log("🎭 [DEBUG] game.rules.selectedThemes :", game?.rules?.selectedThemes);
-    console.log("👤 [DEBUG] Spectateur :", isSpectator);
   
     // Si l'hôte n'a pas encore sélectionné tous les thèmes requis, on affiche la modal
     if (game?.rules?.selectedThemes?.length < game?.rules?.numThemes && !isSpectator) {
@@ -59,10 +70,13 @@ export default function GamePage() {
 
   if (gameLoading) return <p>Chargement...</p>;
 
+  if (gameLoading || showTransition) {
+    return (
+      <PageTransition gameId={gameId} onFinish={() => setShowTransition(false)} />
+    );
+  }
+
   //////////////////////////////////////////////////////////////
-  console.log("📡 [DEBUG] showThemeModal :", showThemeModal);
-  console.log("📡 [DEBUG] game.rules.selectedThemes :", game?.rules?.selectedThemes);
-  console.log("📡 [DEBUG] game.rules.selectedThemes envoyé à ThemeSelectionModal :", game?.rules?.selectedThemes);
 
   return (
     <div className="gameQuizz">

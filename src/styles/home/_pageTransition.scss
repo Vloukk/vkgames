@@ -1,0 +1,29 @@
+@use '../mixins' as *;
+
+.pageTransition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--background);
+    z-index: 9999;
+    &__container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+        .container {
+            &__title {
+                font-size: 2em;
+                color: var(--color--quizz);
+                @include large {
+                    padding: 30px;
+                }
+            }
+        }
+    }
+}
+  
+  
