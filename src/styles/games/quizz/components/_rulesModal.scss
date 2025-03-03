@@ -135,5 +135,8 @@
         margin-top: 10px;
         padding: 10px 15px;
         width: fit-content;
+        &.disabled {
+            display: none;
+        }
     }
 }

@@ -27,16 +27,14 @@ export default function GamePage() {
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   
-  const [showTransition, setShowTransition] = useState(true);
+  const [showTransition, setShowTransition] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && gameId) {
-      console.log("🚀 Affichage de la transition...");
-      
-      // Timer pour masquer la transition après 2 secondes
-      setTimeout(() => {
-        setShowTransition(false);
-      }, 20000);
+      const hasSeenTransition = localStorage.getItem(`seenTransition-${gameId}`);
+      if (!hasSeenTransition) {
+        setShowTransition(true);
+      }
     }
   }, [gameId]);
 
@@ -44,12 +42,25 @@ export default function GamePage() {
   useEffect(() => {
     if (game && uuid && !isSpectator) {
       const rulesSeen = localStorage.getItem(`rulesSeen-${gameId}`);
-      if (game.host_pseudo === pseudo && !rulesSeen) {
+  
+      // Vérifier si les règles sont complètes
+      const isRulesComplete =
+        game.rules &&
+        game.rules.selectedThemes &&
+        game.rules.selectedThemes.length === game.rules.numThemes &&
+        game.rules.maxPlayers >= 1 &&
+        game.rules.timeLimit;
+  
+      if (!rulesSeen || !isRulesComplete) {
+        console.log("📌 [DEBUG] Affichage forcé de RulesModal car les règles sont incomplètes.");
         setShowRulesModal(true);
-        localStorage.setItem(`rulesSeen-${gameId}`, "true");
+      } else {
+        console.log("✅ [DEBUG] Règles complètes, pas besoin de RulesModal.");
+        setShowRulesModal(false);
       }
     }
   }, [game, pseudo, gameId, uuid, isSpectator]);
+  
 
   useEffect(() => {
   

@@ -162,18 +162,22 @@ export default function RulesModal({ gameId, onClose }) {
       } else {
         console.log("✅ Règles sauvegardées !");
     
-        // 🏗️ Mise à jour immédiate de Zustand
+        // ✅ Mise à jour de Zustand
         useGameStore.setState((state) => ({
           game: { ...state.game, rules: updatedRules },
         }));
     
         console.log("♻️ [DEBUG] Zustand mis à jour immédiatement avec les nouvelles règles :", updatedRules);
     
+        // ✅ Marquer les règles comme complètes pour empêcher la modal de revenir
+        localStorage.setItem(`rulesSeen-${gameId}`, "true");
+    
         if (typeof onClose === "function") {
           onClose();
         }
       }
     };
+    
           
             
 

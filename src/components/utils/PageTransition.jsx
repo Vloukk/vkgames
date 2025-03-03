@@ -1,31 +1,44 @@
 "use client";
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 export default function PageTransition({ gameId, onFinish }) {
-  const titleRef = useRef([]);
-
-  useEffect(() => {
-    console.log("🚀 PageTransition animating for:", gameId);
-
-    // Animation Flip comme sur la GameCardHome mais SANS hover
-    gsap.fromTo(
-      titleRef.current,
-      { rotateY: 0 },
-      {
-        rotateY: 360,
-        duration: 3,
-        stagger: 0.05,
-        ease: "power2.out",
-        onComplete: onFinish, // Ferme la transition après l'animation
+    const titleRef = useRef([]);
+    const [hasSeenTransition, setHasSeenTransition] = useState(false);
+  
+    useEffect(() => {
+      if (typeof window !== "undefined") {
+        const seen = localStorage.getItem(`seenTransition-${gameId}`);
+        
+        if (seen) {
+          setHasSeenTransition(true);
+          onFinish(); // On termine immédiatement si la transition a déjà été vue
+          return;
+        } else {
+          localStorage.setItem(`seenTransition-${gameId}`, "true"); // On marque la transition comme vue
+        }
       }
-    );
-
-    return () => {
-      gsap.killTweensOf(titleRef.current); // Arrête l'animation si on change de page
-    };
-  }, [gameId, onFinish]);
+  
+      // Animation Flip comme sur la GameCardHome mais SANS hover
+      gsap.fromTo(
+        titleRef.current,
+        { rotateY: 0 },
+        {
+          rotateY: 360,
+          duration: 3,
+          stagger: 0.05,
+          ease: "power2.out",
+          onComplete: onFinish, // Ferme la transition après l'animation
+        }
+      );
+  
+      return () => {
+        gsap.killTweensOf(titleRef.current); // Arrête l'animation si on change de page
+      };
+    }, [gameId, onFinish]);
+  
+    if (hasSeenTransition) return null; // 🔥 Ne pas afficher la transition si déjà vue
 
   return (
     <motion.div
