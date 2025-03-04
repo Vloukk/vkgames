@@ -1,25 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { fetchPlayers } from "@/services/gameService";
+import usePlayersStore from "@/store/quizz/playerStore";
 
 const usePlayers = (gameId, uuid) => {
-  const [players, setPlayers] = useState([]);
-  const [isSpectator, setIsSpectator] = useState(false);
+  const { players, setPlayers, isSpectator, setIsSpectator } = usePlayersStore();
 
   useEffect(() => {
-    if (!gameId || !uuid) return;
+    if (!gameId || players.length > 0) return; // ✅ Évite un re-fetch inutile
 
     fetchPlayers(gameId).then((playersList) => {
       setPlayers(playersList);
-
-      const currentPlayer = playersList.find((p) => p.uuid === uuid);
-      if (currentPlayer) {
-        setIsSpectator(currentPlayer.is_spectator);
-      }
-    }).catch((error) => {
-      console.error("❌ Erreur fetchPlayers:", error);
+      setIsSpectator(playersList.some(p => p.uuid === uuid && p.is_spectator));
     });
-
-  }, [gameId, uuid]);
+  }, [gameId, players]);
 
   return { players, isSpectator };
 };

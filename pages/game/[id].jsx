@@ -1,10 +1,11 @@
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
-//hooks
+// Hooks
 import useGame from "@/hooks/games/quizz/UseGame";
 import usePlayers from "@/hooks/games/quizz/UsePlayers";
 import usePlayerSession from "@/hooks/games/quizz/UsePlayerSession";
+import { useRealtimeSubscription } from "@/hooks/games/quizz/UseRealtimeSubscription"; // 🔥 Ajout du hook global
 
 // Components
 import GameActions from "@/components/games/quizz/player/GameActions";
@@ -26,8 +27,10 @@ export default function GamePage() {
 
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
-  
   const [showTransition, setShowTransition] = useState(false);
+
+  // ✅ Ajout du hook global pour Supabase
+  useRealtimeSubscription(gameId, uuid);
 
   useEffect(() => {
     if (typeof window !== "undefined" && gameId) {
@@ -38,60 +41,40 @@ export default function GamePage() {
     }
   }, [gameId]);
 
-  // ✅ Afficher la modale des règles pour l'hôte
   useEffect(() => {
     if (game && uuid && !isSpectator) {
       const rulesSeen = localStorage.getItem(`rulesSeen-${gameId}`);
-  
-      // Vérifier si les règles sont complètes
       const isRulesComplete =
         game.rules &&
         game.rules.selectedThemes &&
         game.rules.selectedThemes.length === game.rules.numThemes &&
         game.rules.maxPlayers >= 1 &&
         game.rules.timeLimit;
-  
+
       if (!rulesSeen || !isRulesComplete) {
-        console.log("📌 [DEBUG] Affichage forcé de RulesModal car les règles sont incomplètes.");
         setShowRulesModal(true);
-      } else {
-        console.log("✅ [DEBUG] Règles complètes, pas besoin de RulesModal.");
-        setShowRulesModal(false);
       }
     }
   }, [game, pseudo, gameId, uuid, isSpectator]);
-  
 
   useEffect(() => {
-  
-    // Si l'hôte n'a pas encore sélectionné tous les thèmes requis, on affiche la modal
     if (game?.rules?.selectedThemes?.length < game?.rules?.numThemes && !isSpectator) {
-      console.log("🎨 [DEBUG] Activation de ThemeSelectionModal !");
       setShowThemeModal(true);
     }
-  }, [game?.rules?.selectedThemes, isSpectator]); // ✅ On surveille bien selectedThemes  
+  }, [game?.rules?.selectedThemes, isSpectator]);
 
-  // Afficher la modale si le joueur est l'hôte et les thèmes sont chargés
   useEffect(() => {
     if (game?.rules?.availableThemes?.length > 0 && !isSpectator) {
-      console.log("🎨 [DEBUG] Activation de la sélection des thèmes.");
       setShowThemeModal(true);
     }
   }, [game, isSpectator]);
 
-  if (gameLoading) return <p>Chargement...</p>;
-
   if (gameLoading || showTransition) {
-    return (
-      <PageTransition gameId={gameId} onFinish={() => setShowTransition(false)} />
-    );
+    return <PageTransition gameId={gameId} onFinish={() => setShowTransition(false)} />;
   }
-
-  //////////////////////////////////////////////////////////////
 
   return (
     <div className="gameQuizz">
-      {/* ✅ S'assurer que PseudoModal ne bloque pas RulesModal */}
       {showPseudoModal && (
         <PseudoModal
           gameId={gameId}
@@ -104,16 +87,8 @@ export default function GamePage() {
         />
       )}
 
-      {/* ✅ Afficher RulesModal uniquement si le joueur est l'hôte */}
       {gameId && showRulesModal && <RulesModal gameId={gameId} onClose={() => setShowRulesModal(false)} />}
-
-      {showThemeModal && (
-        <ThemeSelectionModal
-          gameId={gameId}
-          playerId={uuid}
-          onClose={() => setShowThemeModal(false)}
-        />
-      )}
+      {showThemeModal && <ThemeSelectionModal gameId={gameId} playerId={uuid} onClose={() => setShowThemeModal(false)} />}
 
       <div className="gameQuizz__utils">
         {!isSpectator && <GameActions gameId={gameId} uuid={uuid} router={router} />}

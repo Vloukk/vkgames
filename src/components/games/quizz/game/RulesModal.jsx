@@ -3,6 +3,7 @@ import useRules from "@/hooks/games/quizz/useRules";
 export default function RulesModal({ gameId, onClose }) {
   const { rules, allThemes, loading, handleChange, toggleThemeSelection, isValidSelection } = useRules(gameId);
 
+  if (!rules) return <p>Chargement des règles...</p>;
   if (loading) return <p>Chargement...</p>;
 
   const saveRules = () => {

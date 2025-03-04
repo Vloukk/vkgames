@@ -1,87 +1,46 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabaseClient";
-import useThemeColorStore from "@/store/quizz/themeColorStore"; // Import du store des couleurs
+import useThemeColorStore from "@/store/quizz/themeColorStore";
 
 export default function PlayersList({ gameId }) {
   const [players, setPlayers] = useState([]);
-  const { getColor } = useThemeColorStore(); // Récupérer les couleurs des thèmes
+  const { assignColors, getColor } = useThemeColorStore();
+  const [colorsUpdated, setColorsUpdated] = useState(false);
 
-  useEffect(() => {
+  const fetchPlayers = async () => {
     if (!gameId) return;
 
-    const fetchPlayers = async () => {
-      const { data, error } = await supabase
-        .from("players")
-        .select("id, pseudo, score, is_ready, is_spectator, selected_theme_id") // ✅ Ajout de selected_theme_id
-        .eq("game_id", gameId);
+    const { data, error } = await supabase
+      .from("players")
+      .select("id, pseudo, score, is_ready, is_spectator, selected_theme_id")
+      .eq("game_id", gameId);
 
-      if (error) {
-        console.error("❌ Erreur récupération joueurs :", error);
-        return;
-      }
+    if (error) {
+      console.error("❌ Erreur récupération joueurs :", error);
+      return;
+    }
 
-      console.log("✅ Joueurs récupérés :", data);
-      setPlayers(data);
-    };
+    setPlayers(data);
+    assignColors(data.map((player) => player.selected_theme_id).filter(Boolean));
+    setTimeout(() => setColorsUpdated(true), 100);
+  };
 
+  useEffect(() => {
     fetchPlayers();
-
-    // ✅ Écoute en temps réel des changements sur la table `players`
-    const channel = supabase
-      .channel(`players-${gameId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "players" }, (payload) => {
-        console.log("🔄 Changement détecté dans players :", payload);
-
-        if (payload.eventType === "INSERT") {
-          setPlayers((prev) => [...prev, payload.new]);
-        }
-
-        if (payload.eventType === "DELETE") {
-          setPlayers((prev) => prev.filter((p) => p.id !== payload.old.id));
-        }
-
-        if (payload.eventType === "UPDATE") {
-          setPlayers((prev) =>
-            prev.map((p) => (p.id === payload.new.id ? payload.new : p))
-          );
-        }
-      })
-      .subscribe();
-
-    return () => {
-      console.log("📡 Désabonnement des channels Supabase...");
-      supabase.removeChannel(channel);
-    };
   }, [gameId]);
 
-  // ✅ Séparer les joueurs actifs et les spectateurs
-  const activePlayers = players.filter(player => !player.is_spectator);
-  const spectatorsCount = players.filter(player => player.is_spectator).length;
+  if (!colorsUpdated) return <p>🔄 Chargement des couleurs...</p>;
+  if (!players.length) return <p>🔄 Chargement des joueurs...</p>;
 
   return (
     <div className="playersList">
       <ul>
-        {activePlayers.length > 0 ? (
-          activePlayers.map((player) => {
-            const playerThemeColor = player.selected_theme_id ? getColor(player.selected_theme_id) : "#030303";
-
-            return (
-              <li 
-                key={player.id} 
-                style={{ backgroundColor: playerThemeColor }}
-              >
-                {player.pseudo} - Score: {player.score} - 
-                {player.is_ready ? " ✅ Prêt" : " ❌ Pas prêt"}
-              </li>
-            );
-          })
-        ) : (
-          <p>Aucun joueur pour l’instant...</p>
-        )}
+        {players.map((player) => (
+          <li key={player.id} style={{ backgroundColor: getColor(player.selected_theme_id) || "#FFFFFF" }}>
+            {player.pseudo} - Score: {player.score} - {player.is_ready ? " ✅ Prêt" : " ❌ Pas prêt"}
+          </li>
+        ))}
       </ul>
-      
-      {/* ✅ Affichage des spectateurs */}
-      {spectatorsCount > 0 && <p>👀 Spectateurs : {spectatorsCount}</p>}
     </div>
   );
 }

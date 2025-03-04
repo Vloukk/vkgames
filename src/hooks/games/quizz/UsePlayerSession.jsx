@@ -1,39 +1,27 @@
-import { useEffect, useState, useRef } from "react";
-import useGameStore from "@/store/quizz/gameStore";
+import { useEffect } from "react";
 import { joinGame } from "@/services/gameService";
+import usePlayersStore from "@/store/quizz/playerStore";
 
 const usePlayerSession = (gameId) => {
-  const { pseudo, setPseudo } = useGameStore();
-  const [uuid, setUuid] = useState(null);
-  const [showPseudoModal, setShowPseudoModal] = useState(false);
-  const uuidRef = useRef(null);
-
+  const { pseudo, setPseudo, uuid, setUuid } = usePlayersStore();
+  
   useEffect(() => {
     const storedPseudo = localStorage.getItem("pseudo");
-    if (storedPseudo) {
-      setPseudo(storedPseudo);
-      setShowPseudoModal(false); // ✅ Fermer la modale si on a un pseudo
-    } else {
-      setShowPseudoModal(true);
-    }
+    if (storedPseudo) setPseudo(storedPseudo);
 
     const storedUuid = localStorage.getItem("uuid");
-    if (storedUuid) {
-      uuidRef.current = storedUuid;
-      setUuid(storedUuid);
-    } else if (gameId && pseudo) {
+    if (storedUuid) setUuid(storedUuid);
+    else if (gameId && pseudo) {
       joinGame(gameId, pseudo).then((user) => {
         if (user?.uuid) {
           localStorage.setItem("uuid", user.uuid);
-          uuidRef.current = user.uuid;
           setUuid(user.uuid);
         }
       });
     }
   }, [gameId, pseudo]);
 
-  return { pseudo, setPseudo, uuid, showPseudoModal, setShowPseudoModal };
+  return { pseudo, setPseudo, uuid };
 };
 
 export default usePlayerSession;
-
