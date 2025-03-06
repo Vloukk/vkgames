@@ -73,6 +73,8 @@ export default function GamePage() {
     return <PageTransition gameId={gameId} onFinish={() => setShowTransition(false)} />;
   }
 
+  console.log("🟢 [DEBUG] showPseudoModal:", showPseudoModal, "| pseudo:", pseudo, "| uuid:", uuid);
+
   return (
     <div className="gameQuizz">
       {showPseudoModal && (

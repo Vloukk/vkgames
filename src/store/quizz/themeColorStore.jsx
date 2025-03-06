@@ -1,50 +1,52 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-const colors = ["#FFEB3B", "#5DBE74", "#993E3E", "#1F6A73", "#5B44F2", "#C39BD3"];
-
 const useThemeColorStore = create(
-    persist(
-        (set, get) => ({
-            themeColors: {}, // Stocke les couleurs par ID de thème
-            
-            assignColors: (themes) => {
-                set((state) => {
-                    let newColors = { ...state.themeColors };
-                    let usedColors = new Set(Object.values(newColors));
+  persist(
+    (set, get) => ({
+      themeColors: {},
 
-                    console.log("🎨 [DEBUG] Assignation des couleurs aux thèmes :", themes);
-                    console.log("🎨 [DEBUG] Couleurs déjà en mémoire :", newColors);
+      assignColors: (themeIds) => {
+        console.log("🎨 [DEBUG] Assignation des couleurs pour cette partie :", themeIds);
+        console.log("🎨 [DEBUG] État des couleurs AVANT assignation :", get().themeColors);
 
-                    themes.forEach((themeId) => {
-                        if (!newColors[themeId]) { // Assigner une couleur uniquement si elle n'existe pas déjà
-                            let availableColors = colors.filter(c => !usedColors.has(c));
+        const colorPalette = ["#FFEB3B", "#5DBE74", "#993E3E", "#1F6A73", "#5B44F2", "#C39BD3"];
+        const shuffledColors = [...colorPalette].sort(() => Math.random() - 0.5); // Mélange des couleurs
 
-                            if (availableColors.length === 0) {
-                                availableColors = colors; // 🔄 Recycler si nécessaire
-                            }
+        const newColors = {};
+        themeIds.forEach((themeId, index) => {
+          if (!get().themeColors[themeId]) { 
+            newColors[themeId] = shuffledColors[index % shuffledColors.length]; // ✅ Assigne une couleur seulement si elle n’existe pas
+          }
+        });
 
-                            const selectedColor = availableColors.shift(); // 🔹 Prend la première couleur disponible
-                            newColors[themeId] = selectedColor;
-                            usedColors.add(selectedColor);
+        console.log("🎨 [DEBUG] Nouveau mapping des couleurs :", newColors);
 
-                            console.log(`🎨 [DEBUG] Couleur assignée au thème ${themeId} : ${selectedColor}`);
-                        }
-                    });
+        set((state) => ({
+          themeColors: { ...state.themeColors, ...newColors } // ✅ Conserve les anciennes couleurs
+        }));
+      },
 
-                    console.log("🎨 [DEBUG] État final des couleurs :", newColors);
-                    return { themeColors: newColors };
-                });
-            },
+      getColor: (themeId) => {
+        if (!themeId) {
+          console.warn("⚠️ [DEBUG] Aucun themeId reçu pour getColor !");
+          return "#FFFFFF";
+        }
 
-            getColor: (themeId) => {
-                const store = get();
-                return store.themeColors[themeId] || "#FFFFFF"; // ✅ Retourne une couleur blanche si non trouvée
-            },
-        }),
-        { name: "theme-colors-storage" }
-    )
+        // ✅ Forcer React à détecter les changements
+        const themeColors = get().themeColors;
+        const color = themeColors[themeId] || "#FFFFFF";
+
+        console.log("🎨 [DEBUG] getColor - ThemeId :", themeId, "=> Couleur :", color);
+
+        return color;
+      },
+    }),
+    {
+      name: "themeColorStore", // Nom pour le localStorage
+      getStorage: () => localStorage, // Utilise localStorage pour persister les couleurs
+    }
+  )
 );
-
 
 export default useThemeColorStore;

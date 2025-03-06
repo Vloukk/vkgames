@@ -45,8 +45,11 @@ export function useRealtimeSubscription(gameId, playerId) {
 
                     if (payload.new.selected_theme_id) {
                         console.log("🎨 [REALTIME] Mise à jour du thème sélectionné :", payload.new.selected_theme_id);
-                        setSelectedTheme(payload.new.selected_theme_id); // ✅ Stocker dans Zustand
-                    }
+                        setTimeout(() => {
+                            setSelectedTheme(payload.new.selected_theme_id);
+                            console.log("✅ [DEBUG] selectedTheme mis à jour dans Zustand :", usePlayersStore.getState().selectedTheme);
+                        }, 200);                        
+                    }                    
                 }
             )
             .subscribe();

@@ -5,6 +5,7 @@ import usePlayersStore from "@/store/quizz/playerStore";
 
 export function useThemes(gameId, playerId) {
     const [themes, setThemes] = useState([]);
+    const [selectedThemeName, setSelectedThemeName] = useState(""); 
     const { game } = useGameStore();
     const { selectedTheme, setSelectedTheme } = usePlayersStore();
 
@@ -15,7 +16,7 @@ export function useThemes(gameId, playerId) {
     }, [game?.rules?.selectedThemes]);
 
     async function fetchSelectedTheme() {
-        if (!playerId || selectedTheme) return;
+        if (!playerId) return; // ✅ Assurer la récupération même si selectedTheme existe déjà.
 
         const { data, error } = await supabase
             .from("players")
@@ -23,35 +24,50 @@ export function useThemes(gameId, playerId) {
             .eq("uuid", playerId)
             .single();
 
-        if (!error && data?.selected_theme_id) {
-            setSelectedTheme(data.selected_theme_id);
+        if (error) {
+            console.error("❌ [ERROR] Erreur lors de la récupération du thème :", error);
+        } else {
+            console.log("🟢 [DEBUG] Thème récupéré depuis Supabase :", data?.selected_theme_id);
+            if (data?.selected_theme_id) {
+                setSelectedTheme(data.selected_theme_id);
+                fetchThemeName(data.selected_theme_id); // ✅ Récupérer immédiatement le nom du thème après l’assignation
+            }
         }
     }
 
-    useEffect(() => {
-        async function fetchThemeName() {
-            if (!selectedTheme) return;
-            console.log("🔄 [DEBUG] Fetch du nom du thème après mise à jour realtime :", selectedTheme);
+    async function fetchThemeName(themeId = selectedTheme) {
+        if (!themeId) return;
+        
+        console.log("🔄 [DEBUG] Fetch du nom du thème après mise à jour realtime :", themeId);
     
+        setTimeout(async () => {
             const { data, error } = await supabase
                 .from("themes")
-                .select("name")
-                .eq("id", selectedTheme)
+                .select("id, name") // ✅ Récupérer à la fois l'UUID et le nom
+                .eq("id", themeId)
                 .single();
     
             if (!error && data?.name) {
+                console.log("🎯 [DEBUG] Nom du thème trouvé :", data.name, "| UUID :", data.id);
                 setSelectedThemeName(data.name);
-                console.log("🎯 [DEBUG] Nom du thème mis à jour :", data.name);
+                console.log("✅ [DEBUG] selectedThemeName mis à jour :", data.name);
+            } else {
+                console.error("❌ [ERROR] Erreur lors de la récupération du nom du thème :", error);
             }
-        }
-    
-        fetchThemeName();
-    }, [selectedTheme]); // ✅ On surveille `selectedTheme`
-    
+        }, 200);
+    }    
 
     useEffect(() => {
         fetchSelectedTheme();
     }, [playerId]);
+
+    // ✅ S'assurer que fetchThemeName est exécutée après la mise à jour de selectedTheme
+    useEffect(() => {
+        if (selectedTheme) {
+            console.log("🔄 [DEBUG] Mise à jour du nom du thème après changement de selectedTheme :", selectedTheme);
+            fetchThemeName(selectedTheme);
+        }
+    }, [selectedTheme]);
 
     async function selectTheme(themeName, onClose) {
         if (!playerId || !gameId) return;
@@ -72,9 +88,14 @@ export function useThemes(gameId, playerId) {
 
         if (!updateError) {
             setSelectedTheme(data.id);
-            onClose(); // ✅ On ferme la modale après la mise à jour
+            fetchThemeName(data.id); // ✅ Récupérer immédiatement le nom du thème après l’assignation
+            onClose();
         }
     }
 
-    return { themes, selectedTheme, selectTheme };
+    useEffect(() => {
+        console.log("🛠️ [DEBUG] Valeur de selectedTheme dans useThemes :", selectedTheme);
+    }, [selectedTheme]);
+
+    return { themes, selectedTheme, selectedThemeName, selectTheme, fetchThemeName }; // ✅ Ajout de fetchThemeName
 }
